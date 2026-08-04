@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم — معادلة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2f7a5f;
+    --ink-2:#26654e;
+    --paper:#f7f9fc;
+    --paper-2:#eef8f4;
+    --gold:#e8b84b;
+    --teal:#2e86ab;
+    --ruby:#d15b40;
+    --text-dark:#1f2937;
+    --text-muted:#6b7280;
+    --line:rgba(31,41,55,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Tajawal',sans-serif;
+    background:var(--paper);
+    color:var(--text-dark);
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Cairo',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+
+  header{
+    background:var(--ink);color:#fff;padding:20px 28px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  }
+  header .logo{font-family:'Cairo',sans-serif;font-weight:900;font-size:20px;}
+  header .logo span{color:var(--gold);}
+  #logoutBtn{
+    background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.25);
+    padding:9px 18px;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  #logoutBtn:hover{background:rgba(255,255,255,0.2);}
+
+  .wrap{max-width:820px;margin:0 auto;padding:40px 24px 80px;}
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .login-box{
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:40px 34px;width:100%;max-width:380px;box-shadow:0 10px 30px rgba(0,0,0,0.06);
+  }
+  .login-box h2{font-size:22px;margin-bottom:6px;}
+  .login-box p{color:var(--text-muted);font-size:14px;margin-bottom:26px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;color:var(--text-dark);}
+  .field input,.field select{
+    width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;
+    font-family:'Tajawal',sans-serif;font-size:14.5px;background:var(--paper);color:var(--text-dark);
+  }
+  .field input:focus,.field select:focus{border-color:var(--teal);outline:none;}
+  .btn{
+    width:100%;background:var(--ink);color:#fff;border:none;padding:13px;border-radius:8px;
+    font-weight:700;font-size:15px;cursor:pointer;transition:background .2s, transform .2s;
+    font-family:'Tajawal',sans-serif;
+  }
+  .btn:hover{background:var(--teal);transform:translateY(-1px);}
+  #loginError{color:var(--ruby);font-size:13.5px;margin-top:12px;display:none;}
+
+  /* ---------- ADMIN PANEL ---------- */
+  #adminScreen{display:none;}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px;
+    margin-bottom:32px;box-shadow:0 6px 18px rgba(0,0,0,0.04);
+  }
+  .card h2{font-size:19px;margin-bottom:20px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr;}}
+  .add-btn{background:var(--teal);}
+  .add-btn:hover{background:var(--ink);}
+  #formMsg{font-size:13.5px;margin-top:12px;display:none;}
+  #formMsg.ok{color:var(--ink);}
+  #formMsg.err{color:var(--ruby);}
+
+  .row{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:16px 0;border-top:1px solid var(--line);flex-wrap:wrap;
+  }
+  .row:first-of-type{border-top:none;}
+  .row-info h3{font-size:15.5px;margin-bottom:4px;}
+  .row-info .meta{font-size:13px;color:var(--text-muted);}
+  .del-btn{
+    background:#fff;border:1px solid var(--ruby);color:var(--ruby);
+    padding:8px 16px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;
+  }
+  .del-btn:hover{background:var(--ruby);color:#fff;}
+  #emptyState{color:var(--text-muted);font-size:14px;padding:10px 0;}
+</style>
+</head>
+<body>
+
+<!-- ============ شاشة تسجيل الدخول ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>لوحة تحكم معادلة</h2>
+    <p>سجّل دخولك عشان تضيف أو تحذف حصص.</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">الإيميل</label>
+        <input type="email" id="email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn">دخول</button>
+      <p id="loginError">الإيميل أو كلمة المرور غلط.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ============ لوحة التحكم (بعد الدخول) ============ -->
+<div id="adminScreen">
+  <header>
+    <div class="logo">لوحة تحكم مع<span>ادلة</span></div>
+    <button id="logoutBtn">تسجيل خروج</button>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>➕ إضافة حصة جديدة</h2>
+      <form id="addForm">
+        <div class="grid2">
+          <div class="field">
+            <label for="topic">عنوان الدرس</label>
+            <input type="text" id="topic" required placeholder="مثال: المشتقات وتطبيقاتها">
+          </div>
+          <div class="field">
+            <label for="grade">الصف</label>
+            <select id="grade" required>
+              <option value="7">الصف السابع</option>
+              <option value="8">الصف الثامن</option>
+              <option value="9">الصف التاسع</option>
+              <option value="10">الصف العاشر</option>
+              <option value="11">الصف الحادي عشر</option>
+              <option value="12">الصف الثاني عشر</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="datetime">تاريخ ووقت الحصة</label>
+            <input type="datetime-local" id="datetime" required>
+          </div>
+          <div class="field">
+            <label for="duration">مدة الحصة</label>
+            <input type="text" id="duration" required placeholder="مثال: 60 دقيقة" value="60 دقيقة">
+          </div>
+          <div class="field" style="grid-column:1 / -1;">
+            <label for="link">رابط الانضمام (Zoom / Meet)</label>
+            <input type="url" id="link" required placeholder="https://zoom.us/...">
+          </div>
+        </div>
+        <button type="submit" class="btn add-btn">إضافة الحصة</button>
+        <p id="formMsg"></p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>📋 الحصص الحالية</h2>
+      <div id="sessionsList"><p id="emptyState">جاري التحميل...</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const app = initializeApp(window.firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const loginScreen = document.getElementById('loginScreen');
+  const adminScreen = document.getElementById('adminScreen');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+
+  // ---- تسجيل الدخول ----
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginError.style.display = 'none';
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      loginError.style.display = 'block';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginScreen.style.display = 'none';
+      adminScreen.style.display = 'block';
+      startSessionsListener();
+    } else {
+      loginScreen.style.display = 'flex';
+      adminScreen.style.display = 'none';
+    }
+  });
+
+  // ---- إضافة حصة ----
+  const addForm = document.getElementById('addForm');
+  const formMsg = document.getElementById('formMsg');
+
+  addForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const topic = document.getElementById('topic').value.trim();
+    const grade = Number(document.getElementById('grade').value);
+    const gradeNames = {7:'الصف السابع',8:'الصف الثامن',9:'الصف التاسع',10:'الصف العاشر',11:'الصف الحادي عشر',12:'الصف الثاني عشر'};
+    const dt = document.getElementById('datetime').value; // YYYY-MM-DDTHH:MM
+    const duration = document.getElementById('duration').value.trim();
+    const link = document.getElementById('link').value.trim();
+
+    const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const day = dayNames[new Date(dt).getDay()];
+
+    try {
+      await addDoc(collection(db, 'sessions'), {
+        topic, grade, level: gradeNames[grade],
+        day, dateISO: dt + ':00', duration, link,
+        createdAt: Date.now()
+      });
+      formMsg.textContent = 'تمت إضافة الحصة ✔';
+      formMsg.className = 'ok';
+      formMsg.style.display = 'block';
+      addForm.reset();
+      document.getElementById('duration').value = '60 دقيقة';
+    } catch (err) {
+      formMsg.textContent = 'صار خطأ: ' + err.message;
+      formMsg.className = 'err';
+      formMsg.style.display = 'block';
+    }
+  });
+
+  // ---- عرض وحذف الحصص ----
+  let listenerStarted = false;
+  function startSessionsListener() {
+    if (listenerStarted) return;
+    listenerStarted = true;
+    const listEl = document.getElementById('sessionsList');
+    const q = query(collection(db, 'sessions'), orderBy('dateISO'));
+
+    onSnapshot(q, (snapshot) => {
+      listEl.innerHTML = '';
+      if (snapshot.empty) {
+        listEl.innerHTML = '<p id="emptyState">ما في حصص مضافة لسا.</p>';
+        return;
+      }
+      snapshot.forEach(docSnap => {
+        const s = docSnap.data();
+        const dateObj = new Date(s.dateISO);
+        const dateStr = dateObj.toLocaleDateString('ar-EG', { day:'numeric', month:'long' });
+        const timeStr = dateObj.toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' });
+
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `
+          <div class="row-info">
+            <h3>${s.topic}</h3>
+            <div class="meta">${s.level} · ${s.day}، ${dateStr} · ${timeStr} · ${s.duration}</div>
+          </div>
+          <button class="del-btn" data-id="${docSnap.id}">حذف</button>
+        `;
+        row.querySelector('.del-btn').addEventListener('click', async () => {
+          if (confirm('متأكد إنك بدك تحذف هذي الحصة؟')) {
+            await deleteDoc(doc(db, 'sessions', docSnap.id));
+          }
+        });
+        listEl.appendChild(row);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
